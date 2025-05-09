@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>বাংলা বাগধারা কুইজ</title>
+  <style>
+    body { font-family: 'Siyam Rupali', Arial, sans-serif; padding: 20px; }
+    .hidden { display: none; }
+    .question { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    .correct { color: green; font-weight: bold; }
+    .incorrect { color: red; font-weight: bold; }
+    .timer { font-size: 18px; color: darkred; margin-bottom: 20px; }
+    .options label { display: block; margin: 5px 0; }
+    button { padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div id="instruction">
+  <h2>নির্দেশিকা</h2>
+  <ul>
+    <li>এই কুইজে মোট 50 টি প্রশ্ন থাকবে।</li>
+    <li>প্রতিটি প্রশ্নের জন্য সময় ১০ সেকেন্ড, মোট সময় 500 সেকেন্ড।</li>
+    <li>সঠিক উত্তরের জন্য ১ নম্বর এবং ভুল উত্তরের জন্য ⅓ নম্বর কাটা হবে।</li>
+    <li>সময় শেষ হলে কুইজ স্বয়ংক্রিয়ভাবে জমা হয়ে যাবে।</li>
+    <li>ফলাফলে সঠিক উত্তর সবুজ ও ভুল উত্তর লাল রঙে দেখানো হবে।</li>
+    <li>একবার উত্তর দিলে তা পরিবর্তন করা যাবে না।</li>
+    <li>ডান-ক্লিক, Inspect Element ও সোর্স ভিউ নিষিদ্ধ।</li>
+  </ul>
+  <p id="start-countdown">কুইজ শুরু হবে <span id="countdown">60</span> সেকেন্ডে...</p>
+</div>
+
+<div id="quiz-section" class="hidden">
+  <h2>বাংলা বাগধারা কুইজ</h2>
+  <div class="timer" id="timer">সময়: <span id="time-left">500</span> সেকেন্ড</div>
+
+  <form id="quiz-form">
+    <div id="quiz-container"></div>
+    <button type="button" onclick="submitQuiz()">জমা দিন</button>
+  </form>
+
+  <div id="result"></div>
+</div>
+
+<script>
+document.addEventListener('contextmenu', event => event.preventDefault());
+document.onkeydown = function(e) {
+  if (e.keyCode === 123 ||
+      (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+      (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+    return false;
+  }
+};
+
+const questions = [
+{ text: "১. আঁতে ঘা লাগা", options: ["অতি কষ্ট পাওয়া", "অপমানিত হওয়া", "বিরক্ত হওয়া", "অসুস্থ হওয়া"], answer: 0 },
+  { text: "২. হাতের পাঁচ না খেলা", options: ["হারিয়ে ফেলা", "শেষ সুযোগ না নেওয়া", "খেলাধুলা না করা", "নষ্ট হয়ে যাওয়া"], answer: 1 },
+  { text: "৩. মাথা খারাপ হওয়া", options: ["অসুস্থ হওয়া", "পাগল হয়ে যাওয়া", "অসাবধান হওয়া", "ঘুমিয়ে পড়া"], answer: 1 },
+  { text: "৪. গাছে কাঁঠাল গোঁফে তেল", options: ["অমূলক আশাবাদ", "অতিরিক্ত চিন্তা", "বোকামি", "অহংকার"], answer: 0 },
+  { text: "৫. দুধ কলা খাইয়ে সাপ পোষা", options: ["শত্রুকে সাহায্য করা", "কৃপণতা করা", "সাহায্য প্রত্যাখ্যান করা", "বিশ্বাসঘাতকতা করা"], answer: 0 },
+  { text: "৬. কান্না কাটি করা", options: ["অভিনয় করা", "আবেগ প্রকাশ করা", "ভয় দেখানো", "অনুযোগ করা"], answer: 1 },
+  { text: "৭. ইঁদুরের গর্তে হাতি ঢোকা", options: ["অসম্ভব কাজ", "ভয় পাওয়া", "মজার কাণ্ড", "অসাবধানতা"], answer: 0 },
+  { text: "৮. চোখে সরষে ফুল দেখা", options: ["অত্যন্ত রাগান্বিত", "অত্যন্ত কষ্ট পাওয়া", "মাথা ঘোরা", "ভয় পাওয়া"], answer: 3 },
+  { text: "৯. পিঠ বাঁচানো", options: ["পালিয়ে যাওয়া", "নিজেকে রক্ষা করা", "অনুভব করা", "ভয় পাওয়া"], answer: 1 },
+  { text: "১০. মরণ ফাঁদ পাতা", options: ["বিপদ সৃষ্টি", "পরীক্ষা নেওয়া", "শত্রুকে আহ্বান", "খেলা করা"], answer: 0 },
+  { text: "১১. মাথায় হাত পড়া", options: ["অসুস্থ হওয়া", "দুশ্চিন্তাগ্রস্ত হওয়া", "ঘুমিয়ে পড়া", "আঘাত পাওয়া"], answer: 1 },
+  { text: "১২. চক্ষু লজ্জা হওয়া", options: ["বিব্রত হওয়া", "রাগ হওয়া", "চোখে জল আসা", "মাথা ঘোরা"], answer: 0 },
+  { text: "১৩. নাক কাটা যাওয়া", options: ["লজ্জা পাওয়া", "আঘাত পাওয়া", "রক্তপাত হওয়া", "অসুস্থ হওয়া"], answer: 0 },
+  { text: "১৪. ঠোঁট কামড়ানো", options: ["রাগ হওয়া", "ভয় পাওয়া", "উত্তেজনা", "কষ্ট সহ্য করা"], answer: 3 },
+  { text: "১৫. ঘোলা জলে মাছ ধরা", options: ["অবস্থার সুযোগ নেওয়া", "খেলাধুলা করা", "ভ্রমণ করা", "মাছ ধরা"], answer: 0 },
+  { text: "১৬. নাক গলানো", options: ["অপ্রয়োজনীয় হস্তক্ষেপ", "ভালো কাজ করা", "রেগে যাওয়া", "ভয় পাওয়া"], answer: 0 },
+  { text: "১৭. মুখে বাতাস লাগা", options: ["আরাম পাওয়া", "রাগ হওয়া", "ঘুমানো", "অসুস্থ হওয়া"], answer: 0 },
+  { text: "১৮. মনে দাগ কাটা", options: ["ভুলে না যাওয়া", "মজা লাগা", "স্মরণে রাখা", "কষ্ট পাওয়া"], answer: 0 },
+  { text: "১৯. পঞ্চমুখ হওয়া", options: ["খুশি হওয়া", "চিৎকার করা", "অভিনয় করা", "ভয় পাওয়া"], answer: 1 },
+  { text: "২০. হাতে চাঁদ পাওয়া", options: ["বিরল কিছু পাওয়া", "চাঁদ দেখা", "খেলাধুলা", "রাগ হওয়া"], answer: 0 },
+  // প্রশ্ন ২১ থেকে ৫০
+  { text: "২১. গায়ে পড়ে জোকার হওয়া", options: ["নিজেকে লজ্জিত করা", "অহংকারী হওয়া", "খুশি হওয়া", "ভয় পাওয়া"], answer: 0 },
+  { text: "২২. পায়ে পড়া", options: ["অনুরোধ করা", "খেলাধুলা", "ভ্রমণ", "ভয় দেখানো"], answer: 0 },
+  { text: "২৩. কান চুলকানো", options: ["অবাক হওয়া", "শ্রবণ সমস্যা", "লজ্জা পাওয়া", "রেগে যাওয়া"], answer: 2 },
+  { text: "২৪. ছাগলের তিন নম্বর বাচ্চা", options: ["অসাধারণ কিছু", "ভীষণ বোকা", "খুব চালাক", "খুব শক্তিশালী"], answer: 1 },
+  { text: "২৫. ফাঁকা কলস বাজে বেশি", options: ["বোকা মানুষ বেশি বলে", "স্মার্ট লোক", "ভালো মানুষ", "চুপচাপ থাকা"], answer: 0 },
+  { text: "২৬. খায় না যায় না", options: ["অপদার্থ", "ভালো", "বুদ্ধিমান", "অসুস্থ"], answer: 0 },
+  { text: "২৭. মুখে কুলুপ", options: ["চুপ থাকা", "রাগ করা", "হাসা", "ঘুমানো"], answer: 0 },
+  { text: "২৮. হাত ফসকে যাওয়া", options: ["চলে যাওয়া", "রাগ হওয়া", "মারা যাওয়া", "কান্না করা"], answer: 0 },
+  { text: "২৯. জলে কুমির ডাকা", options: ["বিপদে ফেলা", "রক্ষা করা", "মজা করা", "নাচ করা"], answer: 0 },
+  { text: "৩০. নাচতে না জানলে উঠোন বাঁকা", options: ["অজুহাত দেওয়া", "চেষ্টা করা", "রেগে যাওয়া", "ভয় দেখানো"], answer: 0 },
+  { text: "৩১. গা ঝাড়া দেওয়া", options: ["অগ্রাহ্য করা", "পরিষ্কার হওয়া", "ঘুমানো", "লজ্জা পাওয়া"], answer: 0 },
+  { text: "৩২. পিছুটান থাকা", options: ["দ্বিধাগ্রস্ত হওয়া", "খুশি হওয়া", "উদ্যোগ নেওয়া", "জেদ করা"], answer: 0 },
+  { text: "৩৩. মিঠে কথায় ভুলানো", options: ["প্রলোভন দেখানো", "সত্য বলা", "রাগানো", "ভয় দেখানো"], answer: 0 },
+  { text: "৩৪. পায়ের তলা থেকে মাটি সরে যাওয়া", options: ["আচমকা বিপদে পড়া", "চলে যাওয়া", "রেগে যাওয়া", "ভয় পাওয়া"], answer: 0 },
+  { text: "৩৫. ঢাকের শব্দে কান পাতা", options: ["আনন্দিত হওয়া", "ভয় পাওয়া", "প্রতীক্ষা করা", "ঘুমানো"], answer: 2 },
+  { text: "৩৬. দুধে জল মেশানো", options: ["প্রতারণা করা", "খেলাধুলা", "ঘুমানো", "ভয় দেখানো"], answer: 0 },
+  { text: "৩৭. বাঘে গরুতে এক ঘাটে জল খাওয়া", options: ["সমতা হওয়া", "লড়াই করা", "ভয় পাওয়া", "বন্ধুত্ব হওয়া"], answer: 0 },
+  { text: "৩৮. উড়ে এসে জুড়ে বসা", options: ["অপ্রত্যাশিত আগমন", "আসন গ্রহণ", "ভ্রমণ", "ভয় দেখানো"], answer: 0 },
+  { text: "৩৯. অন্ধকারে ঢিল মারা", options: ["অনিশ্চিত কাজ", "মজা করা", "প্রতারণা", "শত্রুতা"], answer: 0 },
+  { text: "৪০. কানে কানে কথা বলা", options: ["চুপিচুপি কিছু বলা", "গান গাওয়া", "গালাগাল", "নাচ করা"], answer: 0 },
+  { text: "৪১. গলার কাঁটা", options: ["বিপত্তি", "খুশি", "আশা", "সাহায্য"], answer: 0 },
+  { text: "৪২. আগুনে ঘি ঢালা", options: ["রাগ বাড়ানো", "ভালোবাসা বাড়ানো", "ভয় দেখানো", "প্রশংসা করা"], answer: 0 },
+  { text: "৪৩. নাক সিঁটকানো", options: ["অবজ্ঞা করা", "ঘ্রাণ নেওয়া", "ভয় পাওয়া", "নাক গলা"], answer: 0 },
+  { text: "৪৪. হাড়ে হাড়ে টের পাওয়া", options: ["অভিজ্ঞতা হওয়া", "রেগে যাওয়া", "ভয় পাওয়া", "দুর্বল হওয়া"], answer: 0 },
+  { text: "৪৫. পিঠ বাঁচানো", options: ["দায় এড়ানো", "রক্ষা করা", "ভ্রমণ করা", "অভিনয় করা"], answer: 0 },
+  { text: "৪৬. গলায় ফাঁস পড়া", options: ["বিপদে পড়া", "ভয় পাওয়া", "আনন্দিত হওয়া", "রেগে যাওয়া"], answer: 0 },
+  { text: "৪৭. গরু মেরে জুতা দান", options: ["ভান করা", "অপচয়", "ভালবাসা", "শত্রুতা"], answer: 1 },
+  { text: "৪৮. অন্ধকারে হাতড়ানো", options: ["অনিশ্চয়তা", "উৎসাহ", "ভয়", "ভালোবাসা"], answer: 0 },
+  { text: "৪৯. পেট পুরে খাওয়া", options: ["অত্যধিক খাওয়া", "কম খাওয়া", "নরম খাওয়া", "বিছানা পাতা"], answer: 0 },
+  { text: "৫০. উল্টো পথে হাঁটা", options: ["বিপরীত আচরণ", "ভ্রমণ", "খেলাধুলা", "নাচ গান"], answer: 0 }
+]; // your existing 50 questions remain unchanged
+
+let totalTime = questions.length * 10;
+let timer;
+
+function startQuiz() {
+  document.getElementById('instruction').classList.add('hidden');
+  document.getElementById('quiz-section').classList.remove('hidden');
+  loadQuiz();
+  startTimer();
+}
+
+function loadQuiz() {
+  const container = document.getElementById("quiz-container");
+  questions.forEach((q, i) => {
+    const questionHTML = `
+      <div class="question" id="q${i}">
+        <p><strong>${q.text}</strong></p>
+        ${q.options.map((opt, j) =>
+          `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`
+        ).join("")}
+      </div>
+    `;
+    container.innerHTML += questionHTML;
+  });
+}
+
+function startTimer() {
+  document.getElementById("time-left").textContent = totalTime;
+  timer = setInterval(() => {
+    totalTime--;
+    document.getElementById("time-left").textContent = totalTime;
+    if (totalTime <= 0) {
+      clearInterval(timer);
+      submitQuiz();
+    }
+  }, 1000);
+}
+
+function submitQuiz() {
+  clearInterval(timer);
+
+  let score = 0;
+
+  questions.forEach((q, i) => {
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    const questionDiv = document.getElementById(`q${i}`);
+    const correctIndex = q.answer;
+
+    if (selected) {
+      const selectedValue = parseInt(selected.value);
+      if (selectedValue === correctIndex) {
+        score += 1;
+        selected.parentElement.classList.add("correct");
+      } else {
+        score -= 1/3;
+        selected.parentElement.classList.add("incorrect");
+        questionDiv.querySelectorAll("input")[correctIndex].parentElement.classList.add("correct");
+      }
+    } else {
+      questionDiv.querySelectorAll("input")[correctIndex].parentElement.classList.add("correct");
+    }
+
+    questionDiv.querySelectorAll("input").forEach(input => input.disabled = true);
+  });
+
+  document.getElementById("result").innerHTML = `
+    <h3>ফলাফল</h3>
+    <p>আপনার প্রাপ্ত নম্বর: ${score.toFixed(2)} / ৫০</p>
+    <p>মোট সময়: ${questions.length * 10} সেকেন্ড</p>
+  `;
+
+  document.querySelector("button").style.display = "none";
+}
+
+// Countdown to auto start quiz
+let countdown = 60;
+const countdownEl = document.getElementById("countdown");
+const countdownTimer = setInterval(() => {
+  countdown--;
+  countdownEl.textContent = countdown;
+  if (countdown <= 0) {
+    clearInterval(countdownTimer);
+    startQuiz();
+  }
+}, 1000);
+</script>
+
+</body>
+</html>
